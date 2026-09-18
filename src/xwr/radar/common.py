@@ -38,7 +38,10 @@ def configure_adc(
     )
 
 
-def configure_channels(rx: int = 0b1111, tx: int = 0b111) -> str:
+def configure_channels(
+    rx: int = 0b1111, tx: int = 0b111,
+    eth_osc_clk: tuple[int, int] | None = None
+) -> str:
     """Configure channels and chirps for time-division multiplexing.
 
     Assigns one sequential chirp per enabled TX antenna (LSB-first).
@@ -48,6 +51,10 @@ def configure_channels(rx: int = 0b1111, tx: int = 0b111) -> str:
     Args:
         rx: RX channel bitmask, e.g. ``0b1111`` for 4 RX antennas.
         tx: TX channel bitmask, e.g. ``0b111`` for 3 TX antennas.
+        eth_osc_clk: `(ethOscClkEn, driveStrength)` for the 25MHz ethernet
+            oscillator clock output. These two extra `channelCfg` arguments
+            exist only on the AWR2544 and AWR2x44P, which require them
+            (leave `None` for all other devices). `(0, 0)` disables the clock.
 
     Returns:
         A string containing multiple lines of commands to send.
@@ -61,6 +68,8 @@ def configure_channels(rx: int = 0b1111, tx: int = 0b111) -> str:
         "adcStartTimeVar": 0.0,  # time tolerance; only 0 is tested
     }
     lines = [f"channelCfg {rx} {tx} {a['cascading']}"]
+    if eth_osc_clk is not None:
+        lines[0] += " {} {}".format(*eth_osc_clk)
     chirp = 0
     i_tx = 0
     tx_remaining = tx

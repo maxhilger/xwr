@@ -238,6 +238,33 @@ The `DC_JACK_5V_IN` (the large switch on the side) should also be set, depending
 
     - Remove the jumper on SOP2, so only a jumper on SOP0 remains (`SOP2:0=001`).
 
+## AWR2944PEVM
+
+!!! info "Firmware"
+
+    Install the [mmWave MCU Plus SDK](https://www.ti.com/tool/MMWAVE-MCUPLUS-SDK) (`04.07.02.01` or later; earlier versions do not support the AWR2944P). You will need two firmware files:
+
+    - `mmwave_mcuplus_sdk_{version}/ti/demo/awr294x/mmw/awr2944P_mmw_demoTDM.appimage`: main application image.
+    - `mmwave_mcuplus_sdk_{version}/tools/awr294x/sbl_qspi.release.tiimage`: bootloader image.
+
+!!! warning "Same hardware caveats as the AWR2944EVM"
+
+    The AWR2944PEVM is the same board design as the [AWR2944EVM](#awr2944evm): it needs the same two jumper caps for `SOP2:0`, and the same external 12v supply (do not mix it up with the DCA1000EVM's 5v supply).
+
+!!! bug "TI UniFlash does not support the AWR2x44P"
+
+    Per TI, the UniFlash GUI cannot flash the AWR2944P; use the `uart_uniflash.py` script shipped with the MCU Plus SDK instead (`mcu_plus_sdk_awr294x_{version}/tools/boot/uart_uniflash.py`). See the [AWR2544LOPEVM](#awr2544lopevm) instructions for an example invocation.
+
+1. Prepare for flashing: identical to the [AWR2944EVM](#awr2944evm) (`SOP2:0=101`, USB to the XDS port, 12v power).
+
+2. Flash both images using `uart_uniflash.py`, selecting the serial port with description `XDS110 Class Application/User UART` (the lower-numbered `/dev/ttyACM*` on linux).
+
+3. Switch the radar to functional mode: remove the jumper on SOP2, so only a jumper on SOP0 remains (`SOP2:0=001`).
+
+!!! note "CLI differences"
+
+    The AWR2x44P (like the AWR2544) has a 25MHz ethernet oscillator clock output, so its `channelCfg` takes two extra arguments, `<ethOscClkEn> <driveStrength>`. The RF front end and antenna array are unchanged, so the `AWR2944EVM` signal processing class still applies.
+
 ## AWRL6844EVM
 
 !!! info "Firmware"
